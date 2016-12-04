@@ -1,0 +1,44 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Vorführungen</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.min.css" />
+    <style>
+    @import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700);
+    .navbar-brand img { height: 36px; width: 166px; }
+    .navbar-brand { padding-top: 15px; padding-bottom: 14px; }
+    </style>
+  </head>
+  <body>
+    
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#"><img src="/img/logo.png" alt="" /></a>
+        </div>
+        
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Kinotickets</a></li>
+          <li><a href="#">Programm</a></li>
+        </ul>
+      </div>
+    </nav>
+    
+    <div class="container">
+      <div class="page-header">
+        <h1>Das Reservieren der Sitze war leider nicht möglich. Eventuell wurden die Sitze zwischenzeitlich reserviert.</h1>
+      </div>
+      <div class="container">
+        <p>
+	      <a th:href="'/sitzplatzbelegung/' + ${vorführungsid}">Zurück zur Sitzwahl</a>
+    	</p>
+      </div>
+    </div>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+  </body>
+</html>

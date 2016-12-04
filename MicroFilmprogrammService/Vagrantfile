@@ -1,0 +1,39 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+serviceInstanzen=[
+  {
+    :hostname => "serviceInstanz1",
+    :ip => "192.168.0.105"
+  },
+  {
+    :hostname => "serviceInstanz2",
+    :ip => "192.168.0.106"
+  }
+]
+
+Vagrant.configure(2) do |config|
+  serviceInstanzen.each do |instanz|
+      
+    config.vm.define instanz[:hostname] do |conf|
+      
+      conf.vm.box = "debian/jessie64"
+      conf.vm.network "private_network", ip: instanz[:ip]
+
+      conf.vm.provision "shell", inline: <<-SHELL
+        echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee /etc/apt/sources.list.d/webupd8team-java.list
+        echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee -a /etc/apt/sources.list.d/webupd8team-java.list
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
+        sudo apt-get update
+        echo debconf shared/accepted-oracle-license-v1-1 select true | \
+        sudo debconf-set-selections
+        echo debconf shared/accepted-oracle-license-v1-1 seen true | \
+        sudo debconf-set-selections
+        sudo apt-get install -y oracle-java8-installer
+      SHELL
+
+      conf.vm.provision "shell", run: "always", inline: <<-SHELL
+        java -jar /vagrant/target/MicroFilmprogrammService-0.0.1-SNAPSHOT-onejar.jar 50000 &
+      SHELL
+    end
+  end
+end

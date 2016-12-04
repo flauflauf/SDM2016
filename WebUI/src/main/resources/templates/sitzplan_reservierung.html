@@ -1,0 +1,58 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<title>Ticketreservierung</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.min.css" />
+		<style>
+		@import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700);
+		.navbar-brand img { height: 36px; width: 166px; }
+		.navbar-brand { padding-top: 15px; padding-bottom: 14px; }
+		</style>
+	</head>
+	<body>
+		
+		<nav class="navbar navbar-default">
+			<div class="container">
+				<div class="navbar-header">
+					<a class="navbar-brand" href="#"><img src="/img/logo.png" alt="" /></a>
+				</div>
+				
+				<ul class="nav navbar-nav">
+					<li><a href="/">Kinotickets</a></li>
+					<li><a href="/">Programm</a></li>
+				</ul>
+			</div>
+		</nav>
+		
+		<div class="container">
+			<div class="page-header">
+				<h1>Sitzplan im Saal ...</h1>
+			</div>
+
+
+		<form id="bookingForm" th:action="'/buchung/' + ${vorfuehrungsid}" method="post" accept-charset="UTF-8">		
+			<ul class="list-group" style="float: left;">
+				<th:block th:each="row, rowStat : ${sitzplatzbelegung.gibSaal().gibLayout()}">
+					<li class="list-group-item">
+						<span class="label label-default">Reihe <span th:text="${rowStat.count}">Default</span></span>
+						<div class="btn-group" role="group">
+							<th:block th:each="seat, seatStat : ${sitzplatzbelegung.gibSaal().gibLayout()[rowStat.index]}">
+								<th:block th:if="${sitzplatzbelegung.sitzIstFrei(seat)}">
+									<input type="checkbox" th:id="sitze" th:name="sitze" th:value="${seat.gibName()}" />
+								</th:block>
+								<th:block th:unless="${sitzplatzbelegung.sitzIstFrei(seat)}">
+									<input type="checkbox" disabled="disabled" />
+								</th:block>
+							</th:block>
+						</div>
+					</li>
+				</th:block>
+			</ul>
+			<input type="submit" id="submitButton" name="submitButton" value="Submit" />
+		</form>
+		</div>		
+	</body>
+</html>
