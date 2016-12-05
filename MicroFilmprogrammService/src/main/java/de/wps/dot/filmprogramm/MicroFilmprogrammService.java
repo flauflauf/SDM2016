@@ -33,7 +33,6 @@ public class MicroFilmprogrammService {
 
 	public void start(int port) {
 		service.start(port);
-		// Umlaute werden beim DNS nicht unterstützt
 	}
 
 	public void stop() {
