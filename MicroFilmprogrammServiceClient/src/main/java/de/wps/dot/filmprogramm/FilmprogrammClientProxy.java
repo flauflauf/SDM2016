@@ -3,9 +3,12 @@ package de.wps.dot.filmprogramm;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import javax.naming.NamingException;
+import javax.naming.directory.Attributes;
+import javax.naming.directory.InitialDirContext;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.Response;
@@ -23,9 +26,10 @@ public class FilmprogrammClientProxy {
 	public List<Vorführung> getVorführungen() throws UnirestException, NamingException {
 		List<Vorführung> freeSeats = null;
 				
-		String serviceIp = getServiceAddressByREST();
+//		String serviceIpAndPort = getServiceIpAndPortByREST();
+		String serviceIpAndPort = getServiceIpAndPortByDNS();
 		
-		URI uri = URI.create("http://"+serviceIp+":50000/vorführungen");
+		URI uri = URI.create("http://"+serviceIpAndPort+"/vorführungen");
 
 		HttpResponse<String> response = Unirest.get(uri.toString()).asString();
 		Type seatListType = new TypeToken<List<Vorführung>>() {
@@ -35,9 +39,29 @@ public class FilmprogrammClientProxy {
 		return freeSeats;
 	}
 
-	private String getServiceAddressByREST() {
+	private String getServiceIpAndPortByDNS() throws NamingException {
+		InitialDirContext kontext = DnsHelfer.erzeugeKontext();
+		Attributes attributes =
+				kontext.getAttributes(
+						"filmprogramm.service.consul",
+						new String[] { "SRV" });
+		
+		String srvEntry = attributes.get("SRV").toString();
+		Map<String, String> portUndHostName = DnsHelfer.findePortUndHostNameAusSrvEintrag(srvEntry);
+		String port = portUndHostName.get("port");
+		String hostName = portUndHostName.get("hostName");
+		
+		Attributes aAttributes = kontext.getAttributes(hostName, new String[] { "A" });
+		String aEntry = aAttributes.get("A").toString();
+		String ip = DnsHelfer.findeIpAusAEintrag(aEntry);
+		
+		return ip + ":" + port;
+	}
+
+	private String getServiceIpAndPortByREST() {
 		ConsulClient consulClient = new ConsulClient();
-		List<HealthService> catalogServices = consulClient.getHealthServices("filmprogramm", true, null).getValue();
+		List<HealthService> catalogServices =
+				consulClient.getHealthServices("filmprogramm", true, null).getValue();
 		
 		if(catalogServices.isEmpty())
 			; // TODO nächster Workshop ;-)
@@ -46,6 +70,7 @@ public class FilmprogrammClientProxy {
 		HealthService service = catalogServices.get(index);
 
 		String serviceIp = service.getNode().getAddress();
-		return serviceIp;
+		int servicePort = service.getService().getPort();
+		return serviceIp + ":" + servicePort;
 	}
 }
