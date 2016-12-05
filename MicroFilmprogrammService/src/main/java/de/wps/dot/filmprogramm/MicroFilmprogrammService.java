@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
+import com.ecwid.consul.v1.ConsulClient;
+import com.ecwid.consul.v1.agent.model.NewService;
+
 public class MicroFilmprogrammService {
 
 	public static void main(String[] args) {
@@ -15,7 +18,16 @@ public class MicroFilmprogrammService {
 
 		int port = Integer.parseInt(args[0]);
 
-		new MicroFilmprogrammService().start(port);
+		MicroFilmprogrammService microFilmprogrammService = new MicroFilmprogrammService();
+		
+		Runtime.getRuntime().addShutdownHook(new Thread(){
+			@Override
+			public void run() {
+				microFilmprogrammService.stop();
+			}			
+		});
+
+		microFilmprogrammService.start(port);
 	}
 
 	private List<Vorführung> ladeVorführungen() {
@@ -33,10 +45,24 @@ public class MicroFilmprogrammService {
 
 	public void start(int port) {
 		service.start(port);
+		
+		serviceId = "filmprogramm-" + port;
+		
+		NewService newService = new NewService();
+		newService.setId(serviceId);
+		newService.setName("filmprogramm");
+		newService.setPort(port);
+		
+		ConsulClient consulClient = new ConsulClient();
+		consulClient.agentServiceRegister(newService);
 	}
 
 	public void stop() {
+		ConsulClient consulClient = new ConsulClient();
+		consulClient.agentServiceDeregister(serviceId);
+
 		service.stop();
 	}
 
+	private String serviceId;
 }

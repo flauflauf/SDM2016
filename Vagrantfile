@@ -12,7 +12,7 @@ Vagrant.configure(2) do |config|
   
   # Start Consul - url is http://192.168.0.5:8500/ui/
   config.vm.define "consul" do |conf|
-    conf.vm.hostname = "consul"
+     conf.vm.hostname = "consul"
 	conf.vm.network "private_network", ip: "192.168.0.5"
 
 	conf.vm.provision "shell", run: "always", inline: <<-SHELL
