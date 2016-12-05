@@ -53,8 +53,35 @@ public class MicroFilmprogrammService {
 		newService.setName("filmprogramm");
 		newService.setPort(port);
 		
+//		NewService.Check httpCheck = new NewService.Check();
+//		httpCheck.setHttp("http://localhost:" + port + "/vorführungen");
+//		httpCheck.setInterval("10s");
+//		httpCheck.setTimeout("2s");
+		
+		NewService.Check ttlCheck = new NewService.Check();
+		ttlCheck.setTtl("10s");
+		
+		newService.setCheck(ttlCheck);
+		
 		ConsulClient consulClient = new ConsulClient();
 		consulClient.agentServiceRegister(newService);
+		
+		Thread thread = new Thread(){
+			@Override
+			public void run() {
+				while(true){
+					ConsulClient client = new ConsulClient();
+					client.agentCheckPass("service:"+ serviceId);
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+		};
+		
+		thread.start();
 	}
 
 	public void stop() {

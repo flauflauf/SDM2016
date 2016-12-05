@@ -10,6 +10,7 @@ import javax.naming.NamingException;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.catalog.model.CatalogService;
+import com.ecwid.consul.v1.health.model.HealthService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mashape.unirest.http.HttpResponse;
@@ -36,15 +37,15 @@ public class FilmprogrammClientProxy {
 
 	private String getServiceAddressByREST() {
 		ConsulClient consulClient = new ConsulClient();
-		List<CatalogService> catalogServices = consulClient.getCatalogService("filmprogramm", null).getValue();
+		List<HealthService> catalogServices = consulClient.getHealthServices("filmprogramm", true, null).getValue();
 		
 		if(catalogServices.isEmpty())
 			; // TODO nächster Workshop ;-)
 		
 		int index = new Random().nextInt(catalogServices.size());
-		CatalogService service = catalogServices.get(index);
+		HealthService service = catalogServices.get(index);
 
-		String serviceIp = service.getAddress();
+		String serviceIp = service.getNode().getAddress();
 		return serviceIp;
 	}
 }
